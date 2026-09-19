@@ -1,28 +1,75 @@
 const express = require("express");
 const router = express.Router();
+
 const Recipe = require("../models/Recipe");
 
-// Get all recipes
+// ==========================================
+// GET ALL RECIPES
+// ==========================================
 router.get("/", async (req, res) => {
   try {
     const recipes = await Recipe.find()
-      .populate("author", "name email profileImage")
+      .populate("author", "name email")
       .sort({ createdAt: -1 });
 
     res.status(200).json(recipes);
   } catch (error) {
+    console.log("Get Recipes Error:", error);
+
     res.status(500).json({
-      message: "Failed to fetch recipes",
-      error: error.message,
+      message: "Failed to get recipes",
     });
   }
 });
 
-// Add new recipe
-router.post("/add", async (req, res) => {
+// ==========================================
+// GET MY FEED
+// ==========================================
+router.get("/feed/:userId", async (req, res) => {
   try {
-    console.log("RECIPE DATA:", req.body);
+    const recipes = await Recipe.find()
+      .populate("author", "name email")
+      .sort({ createdAt: -1 });
 
+    res.status(200).json(recipes);
+  } catch (error) {
+    console.log("My Feed Error:", error);
+
+    res.status(500).json({
+      message: "Failed to load My Feed",
+    });
+  }
+});
+
+// ==========================================
+// GET SINGLE RECIPE
+// ==========================================
+router.get("/:id", async (req, res) => {
+  try {
+    const recipe = await Recipe.findById(req.params.id)
+      .populate("author", "name email");
+
+    if (!recipe) {
+      return res.status(404).json({
+        message: "Recipe not found",
+      });
+    }
+
+    res.status(200).json(recipe);
+  } catch (error) {
+    console.log("Get Single Recipe Error:", error);
+
+    res.status(500).json({
+      message: "Failed to get recipe",
+    });
+  }
+});
+
+// ==========================================
+// ADD NEW RECIPE
+// ==========================================
+router.post("/", async (req, res) => {
+  try {
     const {
       title,
       description,
@@ -34,76 +81,80 @@ router.post("/add", async (req, res) => {
       author,
     } = req.body;
 
-    // Author check
-    if (!author) {
+    if (!title || !description || !ingredients || !instructions) {
       return res.status(400).json({
-        message: "User ID is required",
+        message: "Please fill all required fields",
       });
     }
 
-    // Create recipe
-    const recipe = new Recipe({
+    const newRecipe = new Recipe({
       title,
       description,
       ingredients,
       instructions,
       category,
       cookingTime,
-      image: image || "",
+      image,
       author,
     });
 
-    await recipe.save();
-
-    // Get author details also
-    const savedRecipe = await Recipe.findById(recipe._id).populate(
-      "author",
-      "name email profileImage"
-    );
+    const savedRecipe = await newRecipe.save();
 
     res.status(201).json({
       message: "Recipe added successfully",
       recipe: savedRecipe,
     });
   } catch (error) {
-    console.log("ADD RECIPE ERROR:", error);
+    console.log("Add Recipe Error:", error);
 
     res.status(500).json({
       message: "Failed to add recipe",
-      error: error.message,
     });
   }
 });
 
-// Get recipe by ID
-router.get("/:id", async (req, res) => {
+// ==========================================
+// UPDATE RECIPE
+// ==========================================
+router.put("/:id", async (req, res) => {
   try {
-    const recipe = await Recipe.findById(req.params.id).populate(
-      "author",
-      "name email profileImage"
+    const updatedRecipe = await Recipe.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+      }
     );
 
-    if (!recipe) {
+    if (!updatedRecipe) {
       return res.status(404).json({
         message: "Recipe not found",
       });
     }
 
-    res.status(200).json(recipe);
+    res.status(200).json({
+      message: "Recipe updated successfully",
+      recipe: updatedRecipe,
+    });
   } catch (error) {
+    console.log("Update Recipe Error:", error);
+
     res.status(500).json({
-      message: "Failed to fetch recipe",
-      error: error.message,
+      message: "Failed to update recipe",
     });
   }
 });
 
-// Delete recipe
+// ==========================================
+// DELETE RECIPE
+// ==========================================
 router.delete("/:id", async (req, res) => {
   try {
-    const recipe = await Recipe.findByIdAndDelete(req.params.id);
+    const deletedRecipe = await Recipe.findByIdAndDelete(
+      req.params.id
+    );
 
-    if (!recipe) {
+    if (!deletedRecipe) {
       return res.status(404).json({
         message: "Recipe not found",
       });
@@ -113,9 +164,10 @@ router.delete("/:id", async (req, res) => {
       message: "Recipe deleted successfully",
     });
   } catch (error) {
+    console.log("Delete Recipe Error:", error);
+
     res.status(500).json({
       message: "Failed to delete recipe",
-      error: error.message,
     });
   }
 });

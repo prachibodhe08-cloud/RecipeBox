@@ -5,6 +5,7 @@ import {
   Routes,
   Route,
   Link,
+  useNavigate,
 } from "react-router-dom";
 
 import Login from "./pages/Login";
@@ -18,15 +19,27 @@ import Recipes from "./Recipes";
 import RecipeDetails from "./RecipeDetails";
 
 import MyFeed from "./pages/Myfeed";
+import Cookbooks from "./Cookbooks";
 
+
+// ================= HOME PAGE =================
 
 function Home() {
   const [search, setSearch] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+
+    if (search.trim() !== "") {
+      navigate(`/recipes?search=${encodeURIComponent(search)}`);
+    }
+  };
 
   return (
-    <div className="recipe-container">
+    <div className="home-page">
 
-      {/* ================= NAVBAR ================= */}
+      {/* NAVBAR */}
       <nav className="navbar">
 
         <div className="logo">
@@ -47,8 +60,8 @@ function Home() {
             🏠 My Feed
           </Link>
 
-          <Link to="/home">
-            Cookbooks
+          <Link to="/cookbooks">
+            📚 Cookbooks
           </Link>
 
           <Link to="/add-recipe">
@@ -68,7 +81,8 @@ function Home() {
       </nav>
 
 
-      {/* ================= HERO SECTION ================= */}
+      {/* HERO SECTION */}
+
       <section className="hero">
 
         <h1>
@@ -76,50 +90,48 @@ function Home() {
         </h1>
 
         <p>
-          Discover delicious recipes, share your creations
-          and get inspired by food lovers.
+          Discover delicious recipes and share your favorite dishes.
         </p>
 
 
-        {/* ================= SEARCH ================= */}
-        <div className="search-box">
+        {/* SEARCH */}
+
+        <form onSubmit={handleSearch} className="search-box">
 
           <input
             type="text"
-            placeholder="Search recipes, ingredients..."
+            placeholder="Search recipes or ingredients..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
 
-          <Link
-            to={`/recipes?search=${encodeURIComponent(search)}`}
-          >
-            <button>
-              Search
-            </button>
-          </Link>
+          <button type="submit">
+            🔍 Search
+          </button>
 
-        </div>
+        </form>
 
       </section>
 
 
-      {/* ================= TRENDING RECIPES ================= */}
-      <section className="section">
+      {/* TRENDING RECIPES */}
+
+      <section className="trending">
 
         <h2>
           🔥 Trending Recipes
         </h2>
 
 
-        <div className="recipe-grid">
+        <div className="recipe-cards">
 
-          {/* Chicken Biryani */}
+
+          {/* BIRYANI */}
+
           <div className="recipe-card">
 
             <img
-              className="recipe-image"
-              src="https://images.unsplash.com/photo-1563379091339-03246963d96c?auto=format&fit=crop&w=600&q=80"
+              src="https://images.unsplash.com/photo-1563379091339-03246963d96c?auto=format&fit=crop&w=800&q=80"
               alt="Chicken Biryani"
             />
 
@@ -128,18 +140,18 @@ function Home() {
             </h3>
 
             <p>
-              Delicious and spicy homemade biryani
+              Spicy and delicious Indian biryani.
             </p>
 
           </div>
 
 
-          {/* Veg Pizza */}
+          {/* PIZZA */}
+
           <div className="recipe-card">
 
             <img
-              className="recipe-image"
-              src="https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=600&q=80"
+              src="https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=800&q=80"
               alt="Veg Pizza"
             />
 
@@ -148,18 +160,18 @@ function Home() {
             </h3>
 
             <p>
-              Cheesy pizza loaded with fresh vegetables
+              Cheesy and tasty vegetable pizza.
             </p>
 
           </div>
 
 
-          {/* Chocolate Cake */}
+          {/* CAKE */}
+
           <div className="recipe-card">
 
             <img
-              className="recipe-image"
-              src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80"
+              src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80"
               alt="Chocolate Cake"
             />
 
@@ -168,10 +180,11 @@ function Home() {
             </h3>
 
             <p>
-              Soft and delicious chocolate cake
+              Soft and delicious chocolate cake.
             </p>
 
           </div>
+
 
         </div>
 
@@ -182,7 +195,7 @@ function Home() {
 }
 
 
-/* ================= MAIN APP ================= */
+// ================= MAIN APP =================
 
 function App() {
 
@@ -193,6 +206,7 @@ function App() {
       <Routes>
 
         {/* LOGIN */}
+
         <Route
           path="/"
           element={<Login />}
@@ -205,6 +219,7 @@ function App() {
 
 
         {/* SIGNUP */}
+
         <Route
           path="/signup"
           element={<Signup />}
@@ -212,6 +227,7 @@ function App() {
 
 
         {/* HOME */}
+
         <Route
           path="/home"
           element={<Home />}
@@ -219,6 +235,7 @@ function App() {
 
 
         {/* PROFILE */}
+
         <Route
           path="/profile"
           element={<Profile />}
@@ -226,6 +243,7 @@ function App() {
 
 
         {/* USERS */}
+
         <Route
           path="/users"
           element={<Users />}
@@ -233,6 +251,7 @@ function App() {
 
 
         {/* RECIPES */}
+
         <Route
           path="/recipes"
           element={<Recipes />}
@@ -240,6 +259,7 @@ function App() {
 
 
         {/* RECIPE DETAILS */}
+
         <Route
           path="/recipes/:id"
           element={<RecipeDetails />}
@@ -247,6 +267,7 @@ function App() {
 
 
         {/* ADD RECIPE */}
+
         <Route
           path="/add-recipe"
           element={<AddRecipe />}
@@ -254,9 +275,18 @@ function App() {
 
 
         {/* MY FEED */}
+
         <Route
           path="/my-feed"
           element={<MyFeed />}
+        />
+
+
+        {/* COOKBOOKS */}
+
+        <Route
+          path="/cookbooks"
+          element={<Cookbooks />}
         />
 
       </Routes>
@@ -265,6 +295,5 @@ function App() {
 
   );
 }
-
 
 export default App;

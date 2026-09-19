@@ -24,12 +24,12 @@ const recipeSchema = new mongoose.Schema(
 
     category: {
       type: String,
-      required: true,
+      default: "Other",
     },
 
     cookingTime: {
-      type: String,
-      required: true,
+      type: Number,
+      default: 0,
     },
 
     image: {
@@ -37,11 +37,9 @@ const recipeSchema = new mongoose.Schema(
       default: "",
     },
 
-    // Recipe कोणत्या user ने तयार केली
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
     },
   },
   {

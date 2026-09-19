@@ -1,0 +1,132 @@
+.cookbook-page {
+  min-height: 100vh;
+  background: #f8f8f8;
+}
+
+
+/* Header */
+
+.cookbook-header {
+  text-align: center;
+  padding: 50px 20px 30px;
+}
+
+.cookbook-header h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.cookbook-header p {
+  color: #666;
+  font-size: 17px;
+}
+
+
+/* Cookbook Cards */
+
+.cookbook-grid {
+  width: 90%;
+  max-width: 1100px;
+  margin: 0 auto 50px;
+
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(230px, 1fr)
+  );
+
+  gap: 25px;
+}
+
+
+/* Card */
+
+.cookbook-card {
+  background: white;
+  padding: 25px;
+
+  border-radius: 18px;
+
+  box-shadow:
+    0 5px 18px rgba(0, 0, 0, 0.10);
+
+  transition: 0.3s;
+}
+
+.cookbook-card:hover {
+  transform: translateY(-5px);
+
+  box-shadow:
+    0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+
+/* Emoji */
+
+.cookbook-icon {
+  font-size: 45px;
+  margin-bottom: 10px;
+}
+
+
+/* Title */
+
+.cookbook-card h2 {
+  margin: 10px 0;
+}
+
+
+/* Description */
+
+.cookbook-card p {
+  color: #666;
+  line-height: 1.5;
+}
+
+
+/* Recipe heading */
+
+.cookbook-card h4 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+
+/* Recipe list */
+
+.cookbook-card ul {
+  padding-left: 20px;
+}
+
+.cookbook-card li {
+  margin-bottom: 8px;
+}
+
+
+/* Button */
+
+.cookbook-card button {
+  width: 100%;
+
+  padding: 11px;
+
+  margin-top: 15px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  cursor: pointer;
+
+  background: #222;
+
+  color: white;
+
+  font-size: 15px;
+
+  transition: 0.3s;
+}
+
+.cookbook-card button:hover {
+  background: #444;
+}
