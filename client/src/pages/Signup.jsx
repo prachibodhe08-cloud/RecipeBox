@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function Signup() {
   const navigate = useNavigate();
@@ -12,32 +13,24 @@ function Signup() {
     e.preventDefault();
 
     try {
-      const response = await fetch(
+      const response = await axios.post(
         "http://localhost:5000/api/auth/signup",
         {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name,
-            email,
-            password,
-          }),
+          name: name,
+          email: email,
+          password: password,
         }
       );
 
-      const data = await response.json();
+      alert("Signup successful!");
 
-      if (response.ok) {
-        alert("Signup successful!");
-        navigate("/login");
-      } else {
-        alert(data.message || "Signup failed");
-      }
+      navigate("/login");
     } catch (error) {
       console.error("Signup error:", error);
-      alert("Cannot connect to server.");
+
+      alert(
+        error.response?.data?.message || "Cannot connect to server."
+      );
     }
   };
 
