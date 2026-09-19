@@ -12,17 +12,20 @@ function Signup() {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-        }),
-      });
+      const response = await fetch(
+        "https://recipebox-backend-s0xb.onrender.com/api/auth/signup",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            email,
+            password,
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -42,7 +45,9 @@ function Signup() {
     <div className="auth-page">
       <div className="auth-card">
         <h1>🍲 RecipeBox</h1>
+
         <h2>Create Account</h2>
+
         <p>Join our community of food lovers.</p>
 
         <form onSubmit={handleSignup}>
