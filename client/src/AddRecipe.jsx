@@ -1,44 +1,33 @@
 import { useState } from "react";
 
 function AddRecipe() {
-  const [recipe, setRecipe] = useState({
-    title: "",
-    description: "",
-    ingredients: "",
-    instructions: "",
-    category: "",
-    cookingTime: "",
-    image: "",
-  });
-
-  const handleChange = (e) => {
-    setRecipe({
-      ...recipe,
-      [e.target.name]: e.target.value,
-    });
-  };
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [ingredients, setIngredients] = useState("");
+  const [instructions, setInstructions] = useState("");
+  const [category, setCategory] = useState("");
+  const [cookingTime, setCookingTime] = useState("");
+  const [image, setImage] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const userId = localStorage.getItem("userId");
-
-      if (!userId) {
-        alert("Please login first!");
-        return;
-      }
-
       const response = await fetch(
-        "http://localhost:5000/api/recipes/add",
+        "https://recipebox-backend-s0xb.onrender.com/api/recipes",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            ...recipe,
-            author: userId,
+            title,
+            description,
+            ingredients,
+            instructions,
+            category,
+            cookingTime,
+            image,
           }),
         }
       );
@@ -48,111 +37,98 @@ function AddRecipe() {
       if (response.ok) {
         alert("Recipe added successfully!");
 
-        setRecipe({
-          title: "",
-          description: "",
-          ingredients: "",
-          instructions: "",
-          category: "",
-          cookingTime: "",
-          image: "",
-        });
+        // Clear form
+        setTitle("");
+        setDescription("");
+        setIngredients("");
+        setInstructions("");
+        setCategory("");
+        setCookingTime("");
+        setImage("");
       } else {
         alert(data.message || "Failed to add recipe");
       }
     } catch (error) {
-      console.error(error);
+      console.error("Add Recipe Error:", error);
       alert("Server connection failed");
     }
   };
 
   return (
-    <div style={{ padding: "30px", maxWidth: "700px", margin: "auto" }}>
-      <h1>🍲 Add New Recipe</h1>
+    <div className="add-recipe-page">
+      <div className="add-recipe-card">
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="title"
-          placeholder="Recipe Title"
-          value={recipe.title}
-          onChange={handleChange}
-          required
-        />
+        <h1>🍲 Add Recipe</h1>
 
-        <br />
-        <br />
+        <form onSubmit={handleSubmit}>
 
-        <textarea
-          name="description"
-          placeholder="Recipe Description"
-          value={recipe.description}
-          onChange={handleChange}
-          required
-        />
+          <input
+            type="text"
+            placeholder="Recipe Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
 
-        <br />
-        <br />
+          <textarea
+            placeholder="Recipe Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+          />
 
-        <textarea
-          name="ingredients"
-          placeholder="Ingredients"
-          value={recipe.ingredients}
-          onChange={handleChange}
-          required
-        />
+          <textarea
+            placeholder="Ingredients"
+            value={ingredients}
+            onChange={(e) => setIngredients(e.target.value)}
+            required
+          />
 
-        <br />
-        <br />
+          <textarea
+            placeholder="Instructions"
+            value={instructions}
+            onChange={(e) => setInstructions(e.target.value)}
+            required
+          />
 
-        <textarea
-          name="instructions"
-          placeholder="Cooking Instructions"
-          value={recipe.instructions}
-          onChange={handleChange}
-          required
-        />
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            required
+          >
+            <option value="">Select Category</option>
+            <option value="Italian">Italian</option>
+            <option value="Indian">Indian</option>
+            <option value="Chinese">Chinese</option>
+            <option value="Dessert">Dessert</option>
+            <option value="Breakfast">Breakfast</option>
+            <option value="Lunch">Lunch</option>
+            <option value="Dinner">Dinner</option>
+            <option value="Other">Other</option>
+          </select>
 
-        <br />
-        <br />
+          <input
+            type="number"
+            placeholder="Cooking Time (minutes)"
+            value={cookingTime}
+            onChange={(e) => setCookingTime(e.target.value)}
+            required
+          />
 
-        <input
-          type="text"
-          name="category"
-          placeholder="Category (Breakfast, Lunch, Dessert...)"
-          value={recipe.category}
-          onChange={handleChange}
-          required
-        />
+          <input
+            type="text"
+            placeholder="Image URL"
+            value={image}
+            onChange={(e) => setImage(e.target.value)}
+          />
 
-        <br />
-        <br />
+          <button type="submit">
+            Add Recipe
+          </button>
 
-        <input
-          type="text"
-          name="cookingTime"
-          placeholder="Cooking Time (e.g. 30 minutes)"
-          value={recipe.cookingTime}
-          onChange={handleChange}
-          required
-        />
+        </form>
 
-        <br />
-        <br />
-
-        <input
-          type="url"
-          name="image"
-          placeholder="Recipe Image URL"
-          value={recipe.image}
-          onChange={handleChange}
-        />
-
-        <br />
-        <br />
-
-        <button type="submit">Add Recipe</button>
-      </form>
+      </div>
     </div>
   );
 }
