@@ -13,7 +13,7 @@ function Signup() {
 
     try {
       const response = await fetch(
-        "https://recipebox-backend-s0xb.onrender.com/api/auth/signup",
+        "http://localhost:5000/api/auth/signup",
         {
           method: "POST",
           headers: {
