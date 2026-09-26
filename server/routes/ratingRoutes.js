@@ -14,18 +14,31 @@ router.post("/", async (req, res) => {
     console.log("User:", userName);
     console.log("Rating:", rating);
 
-    if (!recipeId || !userName || !rating) {
+    // Check required fields
+    if (!recipeId || !userName || rating === undefined || rating === null) {
       return res.status(400).json({
         message: "Recipe ID, name and rating are required",
       });
     }
 
+    // Convert rating to number
+    const ratingNumber = Number(rating);
+
+    // Check rating value
+    if (isNaN(ratingNumber) || ratingNumber < 1 || ratingNumber > 5) {
+      return res.status(400).json({
+        message: "Rating must be between 1 and 5",
+      });
+    }
+
+    // Create new rating
     const newRating = new Rating({
       recipeId: recipeId,
-      userName: userName,
-      rating: Number(rating),
+      userName: userName.trim(),
+      rating: ratingNumber,
     });
 
+    // Save rating
     const savedRating = await newRating.save();
 
     console.log("RATING SAVED:", savedRating);
@@ -34,6 +47,7 @@ router.post("/", async (req, res) => {
       message: "Rating added successfully",
       rating: savedRating,
     });
+
   } catch (error) {
     console.log("ADD RATING ERROR:", error);
 
@@ -43,6 +57,7 @@ router.post("/", async (req, res) => {
     });
   }
 });
+
 
 // ===============================
 // GET RATINGS FOR RECIPE
@@ -55,7 +70,7 @@ router.get("/:recipeId", async (req, res) => {
 
     const ratings = await Rating.find({
       recipeId: recipeId,
-    });
+    }).sort({ createdAt: -1 });
 
     console.log("RATINGS FOUND:", ratings);
 
@@ -82,6 +97,7 @@ router.get("/:recipeId", async (req, res) => {
       averageRating: averageRating,
       ratings: ratings,
     });
+
   } catch (error) {
     console.log("GET RATING ERROR:", error);
 
