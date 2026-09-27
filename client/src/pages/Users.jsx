@@ -6,6 +6,9 @@ const BACKEND_URL = "https://recipebox-backend-s0xb.onrender.com";
 function Users() {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   const navigate = useNavigate();
 
   const myEmail = localStorage.getItem("userEmail");
@@ -14,30 +17,37 @@ function Users() {
     fetchUsers();
   }, []);
 
-  // ===============================
-  // GET ALL USERS
-  // ===============================
   const fetchUsers = async () => {
     try {
+      setLoading(true);
+      setError("");
+
       const response = await fetch(
         `${BACKEND_URL}/api/profile/users`
       );
 
       const data = await response.json();
 
-      if (response.ok) {
+      console.log("USERS API RESPONSE:", data);
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch users");
+      }
+
+      if (Array.isArray(data)) {
         setUsers(data);
       } else {
-        console.log("Users error:", data);
+        setUsers([]);
+        setError("Invalid users data received");
       }
     } catch (error) {
-      console.log("Fetch users error:", error);
+      console.error("Fetch users error:", error);
+      setError("Unable to load users");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // ===============================
-  // FOLLOW USER
-  // ===============================
   const handleFollow = async (user) => {
     try {
       const myUser = users.find(
@@ -71,14 +81,11 @@ function Users() {
         alert(data.message || "Follow failed");
       }
     } catch (error) {
-      console.log("Follow error:", error);
+      console.error("Follow error:", error);
       alert("Server error");
     }
   };
 
-  // ===============================
-  // SEARCH USERS
-  // ===============================
   const filteredUsers = users.filter((user) =>
     `${user.name || ""} ${user.email || ""}`
       .toLowerCase()
@@ -116,70 +123,86 @@ function Users() {
           }}
         />
 
-        {filteredUsers.map((user) => (
-          <div
-            key={user._id}
-            style={{
-              background: "white",
-              padding: "20px",
-              marginBottom: "15px",
-              borderRadius: "10px",
-            }}
-          >
-            <h2>{user.name || "No Name"}</h2>
+        {loading && <p>Loading users...</p>}
 
-            <p>📧 {user.email}</p>
+        {error && (
+          <p style={{ color: "red" }}>
+            {error}
+          </p>
+        )}
 
-            <p>
-              👥 Followers:{" "}
-              {user.followers?.length || 0}
-            </p>
-
-            <p>
-              👤 Following:{" "}
-              {user.following?.length || 0}
-            </p>
-
-            <button
-              onClick={() =>
-                navigate(
-                  `/profile?email=${encodeURIComponent(
-                    user.email
-                  )}`
-                )
-              }
+        {!loading &&
+          !error &&
+          filteredUsers.map((user) => (
+            <div
+              key={user._id}
               style={{
-                padding: "10px 20px",
-                marginRight: "10px",
-                border: "none",
-                borderRadius: "8px",
-                cursor: "pointer",
+                background: "white",
+                padding: "20px",
+                marginBottom: "15px",
+                borderRadius: "10px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
               }}
             >
-              View Profile
-            </button>
+              <h2>{user.name || "No Name"}</h2>
 
-            {user.email !== myEmail && (
+              <p>📧 {user.email}</p>
+
+              <p>
+                👥 Followers:{" "}
+                {user.followers?.length || 0}
+              </p>
+
+              <p>
+                👤 Following:{" "}
+                {user.following?.length || 0}
+              </p>
+
               <button
-                onClick={() => handleFollow(user)}
+                onClick={() =>
+                  navigate(
+                    `/profile?email=${encodeURIComponent(
+                      user.email
+                    )}`
+                  )
+                }
                 style={{
                   padding: "10px 20px",
-                  background: "#007bff",
-                  color: "white",
+                  marginRight: "10px",
                   border: "none",
                   borderRadius: "8px",
                   cursor: "pointer",
                 }}
               >
-                Follow
+                View Profile
               </button>
-            )}
-          </div>
-        ))}
 
-        {filteredUsers.length === 0 && (
-          <p>No users found.</p>
-        )}
+              {user.email !== myEmail && (
+                <button
+                  onClick={() => handleFollow(user)}
+                  style={{
+                    padding: "10px 20px",
+                    background: "#007bff",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Follow
+                </button>
+              )}
+            </div>
+          ))}
+
+        {!loading &&
+          !error &&
+          filteredUsers.length === 0 && (
+            <p>
+              No users found
+              {search ? ` for "${search}"` : ""}.
+            </p>
+          )}
       </div>
     </div>
   );
