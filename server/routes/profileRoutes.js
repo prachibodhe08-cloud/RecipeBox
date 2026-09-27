@@ -4,14 +4,17 @@ const User = require("../models/User");
 
 // ==========================================
 // Get All Users
+// URL: /api/profile/users
 // ==========================================
-router.get("/", async (req, res) => {
+router.get("/users", async (req, res) => {
   try {
     const users = await User.find()
       .select("-password");
 
     res.status(200).json(users);
   } catch (error) {
+    console.log("GET USERS ERROR:", error);
+
     res.status(500).json({
       message: "Failed to fetch users",
       error: error.message,
@@ -21,6 +24,7 @@ router.get("/", async (req, res) => {
 
 // ==========================================
 // Get User Profile by Email
+// URL: /api/profile/:email
 // ==========================================
 router.get("/:email", async (req, res) => {
   try {
@@ -36,6 +40,8 @@ router.get("/:email", async (req, res) => {
 
     res.status(200).json(user);
   } catch (error) {
+    console.log("GET PROFILE ERROR:", error);
+
     res.status(500).json({
       message: "Failed to fetch profile",
       error: error.message,
@@ -45,6 +51,7 @@ router.get("/:email", async (req, res) => {
 
 // ==========================================
 // Update User Profile
+// URL: /api/profile/:email
 // ==========================================
 router.put("/:email", async (req, res) => {
   try {
@@ -80,6 +87,8 @@ router.put("/:email", async (req, res) => {
       user,
     });
   } catch (error) {
+    console.log("UPDATE PROFILE ERROR:", error);
+
     res.status(500).json({
       message: "Failed to update profile",
       error: error.message,
