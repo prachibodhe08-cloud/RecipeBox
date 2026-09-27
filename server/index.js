@@ -35,6 +35,22 @@ app.use("/api/recipes", recipeRoutes);
 const authRoutes = require("./routes/authRoutes");
 app.use("/api/auth", authRoutes);
 
+// Profile Routes
+const profileRoutes = require("./routes/profileRoutes");
+app.use("/api/profile", profileRoutes);
+
+// Follow Routes
+const followRoutes = require("./routes/followRoutes");
+app.use("/api/follow", followRoutes);
+
+// Comment Routes
+const commentRoutes = require("./routes/commentRoutes");
+app.use("/api/comments", commentRoutes);
+
+// Rating Routes
+const ratingRoutes = require("./routes/ratingRoutes");
+app.use("/api/ratings", ratingRoutes);
+
 // =========================
 // Test API
 // =========================

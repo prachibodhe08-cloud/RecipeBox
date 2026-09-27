@@ -18,6 +18,7 @@ router.get("/", async (req, res) => {
 
     res.status(500).json({
       message: "Failed to get recipes",
+      error: error.message,
     });
   }
 });
@@ -37,6 +38,7 @@ router.get("/feed/:userId", async (req, res) => {
 
     res.status(500).json({
       message: "Failed to load My Feed",
+      error: error.message,
     });
   }
 });
@@ -61,6 +63,7 @@ router.get("/:id", async (req, res) => {
 
     res.status(500).json({
       message: "Failed to get recipe",
+      error: error.message,
     });
   }
 });
@@ -70,6 +73,9 @@ router.get("/:id", async (req, res) => {
 // ==========================================
 router.post("/", async (req, res) => {
   try {
+    console.log("========== ADD RECIPE ==========");
+    console.log("Request Body:", req.body);
+
     const {
       title,
       description,
@@ -81,9 +87,17 @@ router.post("/", async (req, res) => {
       author,
     } = req.body;
 
+    // Required fields check
     if (!title || !description || !ingredients || !instructions) {
       return res.status(400).json({
         message: "Please fill all required fields",
+      });
+    }
+
+    // Author असल्यासच validate कर
+    if (author && !require("mongoose").Types.ObjectId.isValid(author)) {
+      return res.status(400).json({
+        message: "Invalid user ID",
       });
     }
 
@@ -92,13 +106,15 @@ router.post("/", async (req, res) => {
       description,
       ingredients,
       instructions,
-      category,
-      cookingTime,
-      image,
-      author,
+      category: category || "Other",
+      cookingTime: Number(cookingTime) || 0,
+      image: image || "",
+      author: author || undefined,
     });
 
     const savedRecipe = await newRecipe.save();
+
+    console.log("Recipe Saved:", savedRecipe);
 
     res.status(201).json({
       message: "Recipe added successfully",
@@ -109,6 +125,7 @@ router.post("/", async (req, res) => {
 
     res.status(500).json({
       message: "Failed to add recipe",
+      error: error.message,
     });
   }
 });
@@ -123,6 +140,7 @@ router.put("/:id", async (req, res) => {
       req.body,
       {
         new: true,
+        runValidators: true,
       }
     );
 
@@ -141,6 +159,7 @@ router.put("/:id", async (req, res) => {
 
     res.status(500).json({
       message: "Failed to update recipe",
+      error: error.message,
     });
   }
 });
@@ -168,6 +187,7 @@ router.delete("/:id", async (req, res) => {
 
     res.status(500).json({
       message: "Failed to delete recipe",
+      error: error.message,
     });
   }
 });

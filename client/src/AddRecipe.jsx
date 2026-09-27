@@ -13,6 +13,13 @@ function AddRecipe() {
     e.preventDefault();
 
     try {
+      const userId = localStorage.getItem("userId");
+
+      if (!userId) {
+        alert("Please login first!");
+        return;
+      }
+
       const response = await fetch(
         "https://recipebox-backend-s0xb.onrender.com/api/recipes",
         {
@@ -28,6 +35,7 @@ function AddRecipe() {
             category,
             cookingTime,
             image,
+            author: userId,
           }),
         }
       );
@@ -37,7 +45,6 @@ function AddRecipe() {
       if (response.ok) {
         alert("Recipe added successfully!");
 
-        // Clear form
         setTitle("");
         setDescription("");
         setIngredients("");

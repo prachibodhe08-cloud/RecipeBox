@@ -4,10 +4,8 @@ import { useSearchParams } from "react-router-dom";
 function Profile() {
   const [searchParams] = useSearchParams();
 
-  // URL मधून profile चा email घेणे
   const profileEmail = searchParams.get("email");
 
-  // Login केलेल्या user ची माहिती
   const currentUserEmail = localStorage.getItem("userEmail");
   const currentUserId = localStorage.getItem("userId");
 
@@ -19,12 +17,18 @@ function Profile() {
   const [isFollowing, setIsFollowing] = useState(false);
 
   // =========================
+  // BACKEND URL
+  // =========================
+  const BACKEND_URL =
+    "https://recipebox-backend-s0xb.onrender.com";
+
+  // =========================
   // GET PROFILE
   // =========================
   useEffect(() => {
     const fetchProfile = async () => {
-      // URL मध्ये email नसेल तर logged-in user चा email वापर
-      const emailToFetch = profileEmail || currentUserEmail;
+      const emailToFetch =
+        profileEmail || currentUserEmail;
 
       if (!emailToFetch) {
         setLoading(false);
@@ -33,12 +37,14 @@ function Profile() {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/profile/${encodeURIComponent(
+          `${BACKEND_URL}/api/profile/${encodeURIComponent(
             emailToFetch
           )}`
         );
 
         const data = await response.json();
+
+        console.log("Profile response:", data);
 
         if (response.ok) {
           setProfile(data);
@@ -46,24 +52,37 @@ function Profile() {
           setFollowers(data.followers?.length || 0);
           setFollowing(data.following?.length || 0);
 
-          // Current user या profile ला already follow करतोय का?
-          const alreadyFollowing = data.followers?.some(
-            (id) => id.toString() === currentUserId
-          );
+          const alreadyFollowing =
+            data.followers?.some(
+              (id) =>
+                id.toString() === currentUserId
+            );
 
-          setIsFollowing(alreadyFollowing || false);
+          setIsFollowing(
+            alreadyFollowing || false
+          );
         } else {
-          console.log(data.message);
+          console.log(
+            "Profile error:",
+            data.message
+          );
         }
       } catch (error) {
-        console.log("Profile error:", error);
+        console.log(
+          "Profile fetch error:",
+          error
+        );
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfile();
-  }, [profileEmail, currentUserEmail, currentUserId]);
+  }, [
+    profileEmail,
+    currentUserEmail,
+    currentUserId,
+  ]);
 
   // =========================
   // FOLLOW USER
@@ -79,13 +98,14 @@ function Profile() {
       return;
     }
 
-    // स्वतःला follow करण्यापासून थांबवणे
-    if (currentUserId === profile._id.toString()) {
+    if (
+      currentUserId ===
+      profile._id.toString()
+    ) {
       alert("You cannot follow yourself");
       return;
     }
 
-    // Already following असल्यास पुन्हा follow करू नये
     if (isFollowing) {
       alert("You are already following this user");
       return;
@@ -93,7 +113,7 @@ function Profile() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/follow/follow",
+        `${BACKEND_URL}/api/follow/follow`,
         {
           method: "POST",
           headers: {
@@ -111,16 +131,22 @@ function Profile() {
       if (response.ok) {
         alert("Followed successfully ✅");
 
-        // Target user चे followers +1
-        setFollowers((prev) => prev + 1);
+        setFollowers(
+          (prev) => prev + 1
+        );
 
-        // Button बदलणे
         setIsFollowing(true);
       } else {
-        alert(data.message || "Follow failed");
+        alert(
+          data.message || "Follow failed"
+        );
       }
     } catch (error) {
-      console.log("Follow error:", error);
+      console.log(
+        "Follow error:",
+        error
+      );
+
       alert("Server error");
     }
   };
@@ -130,7 +156,11 @@ function Profile() {
   // =========================
   if (loading) {
     return (
-      <h2 style={{ textAlign: "center" }}>
+      <h2
+        style={{
+          textAlign: "center",
+        }}
+      >
         Loading Profile...
       </h2>
     );
@@ -141,7 +171,11 @@ function Profile() {
   // =========================
   if (!currentUserEmail) {
     return (
-      <h2 style={{ textAlign: "center" }}>
+      <h2
+        style={{
+          textAlign: "center",
+        }}
+      >
         Please Login First
       </h2>
     );
@@ -152,17 +186,22 @@ function Profile() {
   // =========================
   if (!profile) {
     return (
-      <h2 style={{ textAlign: "center" }}>
+      <h2
+        style={{
+          textAlign: "center",
+        }}
+      >
         Profile Not Found
       </h2>
     );
   }
 
   // =========================
-  // CHECK SELF PROFILE
+  // CHECK MY PROFILE
   // =========================
   const isMyProfile =
-    currentUserId === profile._id?.toString();
+    currentUserId ===
+    profile._id?.toString();
 
   return (
     <div
@@ -184,7 +223,9 @@ function Profile() {
       >
         {/* TITLE */}
         <h1>
-          {isMyProfile ? "👤 My Profile" : "👤 User Profile"}
+          {isMyProfile
+            ? "👤 My Profile"
+            : "👤 User Profile"}
         </h1>
 
         {/* PROFILE IMAGE */}
@@ -210,7 +251,8 @@ function Profile() {
 
         {/* BIO */}
         <p>
-          {profile.bio || "No bio added yet."}
+          {profile.bio ||
+            "No bio added yet."}
         </p>
 
         {/* FOLLOWERS / FOLLOWING */}
@@ -227,7 +269,11 @@ function Profile() {
               {followers}
             </h3>
 
-            <p style={{ margin: "5px 0" }}>
+            <p
+              style={{
+                margin: "5px 0",
+              }}
+            >
               Followers
             </p>
           </div>
@@ -237,7 +283,11 @@ function Profile() {
               {following}
             </h3>
 
-            <p style={{ margin: "5px 0" }}>
+            <p
+              style={{
+                margin: "5px 0",
+              }}
+            >
               Following
             </p>
           </div>
@@ -262,7 +312,9 @@ function Profile() {
               color: "white",
             }}
           >
-            {isFollowing ? "Following ✓" : "Follow"}
+            {isFollowing
+              ? "Following ✓"
+              : "Follow"}
           </button>
         )}
       </div>

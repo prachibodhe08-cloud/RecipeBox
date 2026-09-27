@@ -1,34 +1,31 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
+const BACKEND_URL = "https://recipebox-backend-s0xb.onrender.com";
+
 function RecipeDetails() {
   const { id } = useParams();
 
-  // Recipe
   const [recipe, setRecipe] = useState(null);
 
-  // Comments
   const [comments, setComments] = useState([]);
   const [userName, setUserName] = useState("");
   const [commentText, setCommentText] = useState("");
 
-  // Rating
   const [selectedRating, setSelectedRating] = useState(0);
   const [averageRating, setAverageRating] = useState(0);
   const [totalRatings, setTotalRatings] = useState(0);
 
-  // Loading
   const [loading, setLoading] = useState(true);
 
-  // =====================================================
+  // =========================
   // FETCH RECIPE
-  // =====================================================
-
+  // =========================
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/recipes/${id}`
+          `${BACKEND_URL}/api/recipes/${id}`
         );
 
         const data = await response.json();
@@ -36,10 +33,12 @@ function RecipeDetails() {
         if (response.ok) {
           setRecipe(data);
         } else {
-          alert("Recipe not found");
+          console.log("Recipe error:", data);
+          setRecipe(null);
         }
       } catch (error) {
         console.error("Recipe fetch error:", error);
+        setRecipe(null);
       } finally {
         setLoading(false);
       }
@@ -48,14 +47,13 @@ function RecipeDetails() {
     fetchRecipe();
   }, [id]);
 
-  // =====================================================
+  // =========================
   // FETCH COMMENTS
-  // =====================================================
-
+  // =========================
   const fetchComments = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/comments/${id}`
+        `${BACKEND_URL}/api/comments/${id}`
       );
 
       const data = await response.json();
@@ -63,7 +61,7 @@ function RecipeDetails() {
       if (response.ok) {
         setComments(data);
       } else {
-        console.log("Failed to fetch comments");
+        console.log("Comments error:", data);
       }
     } catch (error) {
       console.error("Comments fetch error:", error);
@@ -74,14 +72,13 @@ function RecipeDetails() {
     fetchComments();
   }, [id]);
 
-  // =====================================================
+  // =========================
   // FETCH RATINGS
-  // =====================================================
-
+  // =========================
   const fetchRatings = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/ratings/${id}`
+        `${BACKEND_URL}/api/ratings/${id}`
       );
 
       const data = await response.json();
@@ -90,7 +87,7 @@ function RecipeDetails() {
         setAverageRating(data.averageRating || 0);
         setTotalRatings(data.totalRatings || 0);
       } else {
-        console.log("Failed to fetch ratings");
+        console.log("Ratings error:", data);
       }
     } catch (error) {
       console.error("Ratings fetch error:", error);
@@ -101,26 +98,23 @@ function RecipeDetails() {
     fetchRatings();
   }, [id]);
 
-  // =====================================================
+  // =========================
   // ADD COMMENT
-  // =====================================================
-
+  // =========================
   const addComment = async () => {
     if (!userName.trim() || !commentText.trim()) {
-      alert("Please fill all fields");
+      alert("Please enter your name and comment");
       return;
     }
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/comments",
+        `${BACKEND_URL}/api/comments`,
         {
           method: "POST",
-
           headers: {
             "Content-Type": "application/json",
           },
-
           body: JSON.stringify({
             recipeId: id,
             userName: userName.trim(),
@@ -136,29 +130,25 @@ function RecipeDetails() {
 
         setCommentText("");
 
-        fetchComments();
+        await fetchComments();
       } else {
         alert(data.message || "Failed to add comment");
       }
     } catch (error) {
       console.error("Comment error:", error);
-
-      alert("Server error");
+      alert("Server connection error");
     }
   };
 
-  // =====================================================
+  // =========================
   // SUBMIT RATING
-  // =====================================================
-
+  // =========================
   const submitRating = async () => {
-    // Check rating
     if (selectedRating === 0) {
       alert("Please select a rating");
       return;
     }
 
-    // Check name
     if (!userName.trim()) {
       alert("Please enter your name before rating");
       return;
@@ -166,14 +156,12 @@ function RecipeDetails() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/ratings",
+        `${BACKEND_URL}/api/ratings`,
         {
           method: "POST",
-
           headers: {
             "Content-Type": "application/json",
           },
-
           body: JSON.stringify({
             recipeId: id,
             userName: userName.trim(),
@@ -185,121 +173,45 @@ function RecipeDetails() {
       const data = await response.json();
 
       if (response.ok) {
-        // ==========================================
-        // UPDATE RATING IMMEDIATELY
-        // ==========================================
+        alert("Rating added successfully ⭐");
 
-        const oldTotal = totalRatings;
-        const oldAverage = averageRating;
-
-        const newTotal = oldTotal + 1;
-
-        const newAverage =
-          (oldAverage * oldTotal + selectedRating) /
-          newTotal;
-
-        setTotalRatings(newTotal);
-
-        setAverageRating(
-          Number(newAverage.toFixed(1))
-        );
-
-        // Reset selected star
         setSelectedRating(0);
 
-        alert("Rating Added Successfully ⭐");
+        await fetchRatings();
       } else {
-        alert(
-          data.message || "Failed to add rating"
-        );
+        alert(data.message || "Failed to add rating");
       }
     } catch (error) {
       console.error("Rating error:", error);
-
-      alert("Server error");
+      alert("Server connection error");
     }
   };
 
-  // =====================================================
+  // =========================
   // LOADING
-  // =====================================================
-
+  // =========================
   if (loading) {
     return (
-      <h2
-        style={{
-          textAlign: "center",
-          marginTop: "50px",
-        }}
-      >
+      <h2 style={{ textAlign: "center", marginTop: "50px" }}>
         Loading...
       </h2>
     );
   }
 
-  // =====================================================
+  // =========================
   // RECIPE NOT FOUND
-  // =====================================================
-
+  // =========================
   if (!recipe) {
     return (
-      <h2
-        style={{
-          textAlign: "center",
-          marginTop: "50px",
-        }}
-      >
+      <h2 style={{ textAlign: "center", marginTop: "50px" }}>
         Recipe not found
       </h2>
     );
   }
 
-  // =====================================================
-  // YOUTUBE VIDEO URL
-  // =====================================================
-
-  const getYouTubeEmbedUrl = (url) => {
-    if (!url) {
-      return "";
-    }
-
-    try {
-      const videoUrl = new URL(url);
-
-      // youtube.com/watch?v=VIDEO_ID
-      if (videoUrl.hostname.includes("youtube.com")) {
-        const videoId =
-          videoUrl.searchParams.get("v");
-
-        if (videoId) {
-          return `https://www.youtube.com/embed/${videoId}`;
-        }
-      }
-
-      // youtu.be/VIDEO_ID
-      if (videoUrl.hostname.includes("youtu.be")) {
-        const videoId =
-          videoUrl.pathname.substring(1);
-
-        if (videoId) {
-          return `https://www.youtube.com/embed/${videoId}`;
-        }
-      }
-    } catch (error) {
-      console.error("Invalid video URL");
-    }
-
-    return "";
-  };
-
-  const videoUrl = getYouTubeEmbedUrl(
-    recipe.videoUrl
-  );
-
-  // =====================================================
+  // =========================
   // PAGE
-  // =====================================================
-
+  // =========================
   return (
     <div
       style={{
@@ -309,22 +221,9 @@ function RecipeDetails() {
         fontFamily: "Arial, sans-serif",
       }}
     >
-      {/* =================================================
-          RECIPE TITLE
-      ================================================= */}
-
-      <h1
-        style={{
-          textAlign: "center",
-          marginBottom: "20px",
-        }}
-      >
+      <h1 style={{ textAlign: "center" }}>
         {recipe.title}
       </h1>
-
-      {/* =================================================
-          RECIPE IMAGE
-      ================================================= */}
 
       {recipe.image && (
         <img
@@ -340,41 +239,21 @@ function RecipeDetails() {
         />
       )}
 
-      {/* =================================================
-          DESCRIPTION
-      ================================================= */}
-
       <h2>📝 Description</h2>
 
-      <p
-        style={{
-          lineHeight: "1.6",
-        }}
-      >
+      <p style={{ lineHeight: "1.6" }}>
         {recipe.description}
       </p>
-
-      {/* =================================================
-          CATEGORY
-      ================================================= */}
 
       <p>
         <strong>Category:</strong>{" "}
         {recipe.category || "Not specified"}
       </p>
 
-      {/* =================================================
-          COOKING TIME
-      ================================================= */}
-
       <p>
         <strong>⏱ Cooking Time:</strong>{" "}
-        {recipe.cookingTime || "Not specified"}
+        {recipe.cookingTime || "Not specified"} minutes
       </p>
-
-      {/* =================================================
-          INGREDIENTS
-      ================================================= */}
 
       <h2>🥕 Ingredients</h2>
 
@@ -387,10 +266,6 @@ function RecipeDetails() {
         {recipe.ingredients}
       </p>
 
-      {/* =================================================
-          INSTRUCTIONS
-      ================================================= */}
-
       <h2>👩‍🍳 Instructions</h2>
 
       <p
@@ -402,36 +277,9 @@ function RecipeDetails() {
         {recipe.instructions}
       </p>
 
-      {/* =================================================
-          COOKING VIDEO
-      ================================================= */}
-
-      {videoUrl && (
-        <div
-          style={{
-            marginTop: "30px",
-          }}
-        >
-          <h2>🎥 Cooking Video</h2>
-
-          <iframe
-            width="100%"
-            height="450"
-            src={videoUrl}
-            title="Cooking Video"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            style={{
-              borderRadius: "12px",
-            }}
-          ></iframe>
-        </div>
-      )}
-
-      {/* =================================================
-          RATING SECTION
-      ================================================= */}
+      {/* =========================
+          RATING
+      ========================= */}
 
       <div
         style={{
@@ -444,30 +292,16 @@ function RecipeDetails() {
       >
         <h2>⭐ Recipe Rating</h2>
 
-        {/* Average Rating */}
-
-        <h3
-          style={{
-            fontSize: "28px",
-            marginBottom: "5px",
-          }}
-        >
+        <h3 style={{ fontSize: "28px" }}>
           ⭐ {averageRating} / 5
         </h3>
 
         <p>
-          Based on{" "}
-          <strong>{totalRatings}</strong>{" "}
-          {totalRatings === 1
-            ? "rating"
-            : "ratings"}
+          Based on <strong>{totalRatings}</strong>{" "}
+          {totalRatings === 1 ? "rating" : "ratings"}
         </p>
 
-        {/* Your Rating */}
-
         <h3>Your Rating:</h3>
-
-        {/* Stars */}
 
         <div
           style={{
@@ -481,19 +315,13 @@ function RecipeDetails() {
           {[1, 2, 3, 4, 5].map((star) => (
             <span
               key={star}
-              onClick={() =>
-                setSelectedRating(star)
-              }
+              onClick={() => setSelectedRating(star)}
               style={{
                 cursor: "pointer",
-
                 color:
                   star <= selectedRating
                     ? "#f5b301"
                     : "#ccc",
-
-                transition:
-                  "color 0.2s",
               }}
             >
               ★
@@ -501,30 +329,11 @@ function RecipeDetails() {
           ))}
         </div>
 
-        {/* Selected Rating */}
-
-        {selectedRating > 0 && (
-          <p
-            style={{
-              fontSize: "18px",
-            }}
-          >
-            You selected{" "}
-            <strong>
-              {selectedRating} / 5
-            </strong>
-          </p>
-        )}
-
-        {/* User Name */}
-
         <input
           type="text"
           placeholder="Enter your name"
           value={userName}
-          onChange={(e) =>
-            setUserName(e.target.value)
-          }
+          onChange={(e) => setUserName(e.target.value)}
           style={{
             width: "100%",
             padding: "12px",
@@ -537,8 +346,6 @@ function RecipeDetails() {
           }}
         />
 
-        {/* Submit Rating */}
-
         <button
           onClick={submitRating}
           style={{
@@ -547,53 +354,23 @@ function RecipeDetails() {
             borderRadius: "6px",
             cursor: "pointer",
             fontSize: "16px",
-            background: "#f5b301",
-            color: "white",
           }}
         >
           Submit Rating
         </button>
       </div>
 
-      {/* =================================================
-          COMMENTS SECTION
-      ================================================= */}
+      {/* =========================
+          COMMENTS
+      ========================= */}
 
-      <div
-        style={{
-          marginTop: "40px",
-        }}
-      >
+      <div style={{ marginTop: "40px" }}>
         <h2>💬 Comments</h2>
-
-        {/* Comment Name */}
-
-        <input
-          type="text"
-          placeholder="Your name"
-          value={userName}
-          onChange={(e) =>
-            setUserName(e.target.value)
-          }
-          style={{
-            width: "100%",
-            padding: "12px",
-            marginBottom: "10px",
-            borderRadius: "6px",
-            border: "1px solid #ccc",
-            boxSizing: "border-box",
-            fontSize: "16px",
-          }}
-        />
-
-        {/* Comment Text */}
 
         <textarea
           placeholder="Write your comment..."
           value={commentText}
-          onChange={(e) =>
-            setCommentText(e.target.value)
-          }
+          onChange={(e) => setCommentText(e.target.value)}
           rows="4"
           style={{
             width: "100%",
@@ -604,9 +381,7 @@ function RecipeDetails() {
             boxSizing: "border-box",
             fontSize: "16px",
           }}
-        ></textarea>
-
-        {/* Add Comment Button */}
+        />
 
         <button
           onClick={addComment}
@@ -621,15 +396,7 @@ function RecipeDetails() {
           Add Comment
         </button>
 
-        {/* =================================================
-            COMMENTS LIST
-        ================================================= */}
-
-        <div
-          style={{
-            marginTop: "25px",
-          }}
-        >
+        <div style={{ marginTop: "25px" }}>
           {comments.length === 0 ? (
             <p>No comments yet.</p>
           ) : (
@@ -637,20 +404,13 @@ function RecipeDetails() {
               <div
                 key={comment._id}
                 style={{
-                  borderBottom:
-                    "1px solid #ddd",
+                  borderBottom: "1px solid #ddd",
                   padding: "15px 0",
                 }}
               >
-                <strong>
-                  {comment.userName}
-                </strong>
+                <strong>{comment.userName}</strong>
 
-                <p
-                  style={{
-                    margin: "5px 0",
-                  }}
-                >
+                <p style={{ margin: "5px 0" }}>
                   {comment.commentText}
                 </p>
               </div>
