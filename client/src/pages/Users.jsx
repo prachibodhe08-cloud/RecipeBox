@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const BACKEND_URL = "https://recipebox-backend-s0xb.onrender.com";
+
 function Users() {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
@@ -12,25 +14,32 @@ function Users() {
     fetchUsers();
   }, []);
 
+  // ===============================
+  // GET ALL USERS
+  // ===============================
   const fetchUsers = async () => {
     try {
       const response = await fetch(
-        "http://localhost:5000/api/profile"
+        `${BACKEND_URL}/api/profile/users`
       );
 
       const data = await response.json();
 
       if (response.ok) {
         setUsers(data);
+      } else {
+        console.log("Users error:", data);
       }
     } catch (error) {
-      console.log(error);
+      console.log("Fetch users error:", error);
     }
   };
 
+  // ===============================
+  // FOLLOW USER
+  // ===============================
   const handleFollow = async (user) => {
     try {
-      // माझा user शोधतो
       const myUser = users.find(
         (u) => u.email === myEmail
       );
@@ -41,7 +50,7 @@ function Users() {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/follow/${user._id}/follow`,
+        `${BACKEND_URL}/api/follow/${user._id}/follow`,
         {
           method: "POST",
           headers: {
@@ -67,9 +76,12 @@ function Users() {
     }
   };
 
+  // ===============================
+  // SEARCH USERS
+  // ===============================
   const filteredUsers = users.filter((user) =>
-    user.name
-      ?.toLowerCase()
+    `${user.name || ""} ${user.email || ""}`
+      .toLowerCase()
       .includes(search.toLowerCase())
   );
 
@@ -91,7 +103,7 @@ function Users() {
 
         <input
           type="text"
-          placeholder="Search user..."
+          placeholder="Search user by name or email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{
