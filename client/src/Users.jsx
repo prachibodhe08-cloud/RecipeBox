@@ -1,85 +1,110 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const BACKEND_URL = "https://recipebox-backend-s0xb.onrender.com";
+
 function Users() {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   const navigate = useNavigate();
 
-  const loggedInUserId = localStorage.getItem("userId");
+  const myEmail = localStorage.getItem("userEmail");
+  const myUserId = localStorage.getItem("userId");
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:5000/api/profile"
-        );
-
-        const data = await response.json();
-
-        if (response.ok) {
-          setUsers(data);
-        } else {
-          console.log(data.message);
-        }
-      } catch (error) {
-        console.log("Users error:", error);
-      }
-    };
-
     fetchUsers();
   }, []);
 
-  // Follow User
-  const handleFollow = async (userId) => {
+  const fetchUsers = async () => {
     try {
+      setLoading(true);
+      setError("");
+
       const response = await fetch(
-        "http://localhost:5000/api/follow",
+        `${BACKEND_URL}/api/profile/users`
+      );
+
+      const data = await response.json();
+
+      console.log("USERS API RESPONSE:", data);
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch users");
+      }
+
+      if (Array.isArray(data)) {
+        setUsers(data);
+      } else {
+        setUsers([]);
+        setError("Invalid users data received");
+      }
+    } catch (error) {
+      console.error("Fetch users error:", error);
+      setError("Unable to load users");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFollow = async (user) => {
+    try {
+      if (!myUserId) {
+        alert("Please login again.");
+        return;
+      }
+
+      if (!user?._id) {
+        alert("User ID not found.");
+        return;
+      }
+
+      if (user._id === myUserId) {
+        alert("You cannot follow yourself.");
+        return;
+      }
+
+      console.log("Current User ID:", myUserId);
+      console.log("Target User ID:", user._id);
+
+      const response = await fetch(
+        `${BACKEND_URL}/api/follow/${user._id}/follow`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            followerId: loggedInUserId,
-            followingId: userId,
+            currentUserId: myUserId,
           }),
         }
       );
 
       const data = await response.json();
 
+      console.log("FOLLOW RESPONSE:", data);
+
       if (response.ok) {
-        alert(data.message || "Follow successful!");
+        alert(data.message || "Follow successful");
 
-        // Users पुन्हा fetch करणे
-        const usersResponse = await fetch(
-          "http://localhost:5000/api/profile"
-        );
-
-        const usersData = await usersResponse.json();
-
-        if (usersResponse.ok) {
-          setUsers(usersData);
-        }
+        // Refresh users
+        await fetchUsers();
       } else {
-        alert(data.message || "Server error");
+        alert(data.message || "Follow failed");
       }
     } catch (error) {
-      console.log("Follow error:", error);
-      alert("Server error");
+      console.error("Follow error:", error);
+      alert("Server error while following user.");
     }
   };
 
-  // Search by Name OR Email
-  const filteredUsers = users.filter((user) => {
-    const searchText = search.toLowerCase();
-
-    return (
-      user.name?.toLowerCase().includes(searchText) ||
-      user.email?.toLowerCase().includes(searchText)
-    );
-  });
+  const filteredUsers = users.filter((user) =>
+    `${user.name || ""} ${user.email || ""}`
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  );
 
   return (
     <div
@@ -97,7 +122,6 @@ function Users() {
       >
         <h1>👥 Find Users</h1>
 
-        {/* Search Box */}
         <input
           type="text"
           placeholder="Search user by name or email..."
@@ -110,79 +134,101 @@ function Users() {
             boxSizing: "border-box",
             borderRadius: "8px",
             border: "1px solid #ccc",
-            fontSize: "16px",
-            outline: "none",
           }}
         />
 
-        {/* Users */}
-        {filteredUsers.map((user) => (
-          <div
-            key={user._id}
-            style={{
-              background: "white",
-              padding: "20px",
-              marginBottom: "15px",
-              borderRadius: "10px",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-            }}
-          >
-            <h2>{user.name || "No Name"}</h2>
+        {loading && <p>Loading users...</p>}
 
-            <p>📧 {user.email}</p>
-
-            <p>
-              👥 Followers: {user.followers?.length || 0}
-            </p>
-
-            <p>
-              👤 Following: {user.following?.length || 0}
-            </p>
-
-            <button
-              onClick={() =>
-                navigate(
-                  `/profile?email=${encodeURIComponent(user.email)}`
-                )
-              }
-              style={{
-                padding: "10px 16px",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                marginRight: "10px",
-              }}
-            >
-              View Profile
-            </button>
-
-            {/* Follow Button */}
-            {user._id !== loggedInUserId && (
-              <button
-                onClick={() => handleFollow(user._id)}
-                style={{
-                  padding: "10px 16px",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  background: "#007bff",
-                  color: "white",
-                }}
-              >
-                Follow
-              </button>
-            )}
-          </div>
-        ))}
-
-        {/* No Users */}
-        {filteredUsers.length === 0 && (
-          <p>
-            {search
-              ? `No users found for "${search}"`
-              : "No users found."}
+        {error && (
+          <p style={{ color: "red" }}>
+            {error}
           </p>
         )}
+
+        {!loading &&
+          !error &&
+          filteredUsers.map((user) => {
+            const isMe =
+              user._id === myUserId ||
+              user.email === myEmail;
+
+            return (
+              <div
+                key={user._id}
+                style={{
+                  background: "white",
+                  padding: "20px",
+                  marginBottom: "15px",
+                  borderRadius: "10px",
+                  boxShadow:
+                    "0 2px 8px rgba(0,0,0,0.08)",
+                }}
+              >
+                <h2>{user.name || "No Name"}</h2>
+
+                <p>📧 {user.email}</p>
+
+                <p>
+                  👥 Followers:{" "}
+                  {Array.isArray(user.followers)
+                    ? user.followers.length
+                    : 0}
+                </p>
+
+                <p>
+                  👤 Following:{" "}
+                  {Array.isArray(user.following)
+                    ? user.following.length
+                    : 0}
+                </p>
+
+                <button
+                  onClick={() =>
+                    navigate(
+                      `/profile?email=${encodeURIComponent(
+                        user.email
+                      )}`
+                    )
+                  }
+                  style={{
+                    padding: "10px 20px",
+                    marginRight: "10px",
+                    border: "none",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    background: "#eee",
+                  }}
+                >
+                  View Profile
+                </button>
+
+                {!isMe && (
+                  <button
+                    onClick={() => handleFollow(user)}
+                    style={{
+                      padding: "10px 20px",
+                      background: "#007bff",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Follow
+                  </button>
+                )}
+              </div>
+            );
+          })}
+
+        {!loading &&
+          !error &&
+          filteredUsers.length === 0 && (
+            <p>
+              No users found
+              {search ? ` for "${search}"` : ""}.
+            </p>
+          )}
       </div>
     </div>
   );
