@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-const BACKEND_URL = "https://recipebox-backend-s0xb.onrender.com";
+const BACKEND_URL =
+  "https://recipebox-backend-s0xb.onrender.com";
 
 function RecipeDetails() {
   const { id } = useParams();
@@ -99,11 +100,74 @@ function RecipeDetails() {
   }, [id]);
 
   // =========================
+  // SHARE RECIPE
+  // =========================
+  const shareRecipe = async () => {
+    const recipeUrl = window.location.href;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: recipe.title,
+          text: `Check out this recipe: ${recipe.title}`,
+          url: recipeUrl,
+        });
+      } else {
+        await navigator.clipboard.writeText(recipeUrl);
+
+        alert(
+          "Recipe link copied successfully! 📋"
+        );
+      }
+    } catch (error) {
+      console.log("Share cancelled or failed:", error);
+    }
+  };
+
+  // =========================
+  // COPY LINK
+  // =========================
+  const copyRecipeLink = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        window.location.href
+      );
+
+      alert("Recipe link copied! 📋");
+    } catch (error) {
+      console.error("Copy error:", error);
+
+      alert("Unable to copy link.");
+    }
+  };
+
+  // =========================
+  // WHATSAPP SHARE
+  // =========================
+  const shareOnWhatsApp = () => {
+    const recipeUrl = window.location.href;
+
+    const message = `Check out this recipe: ${recipe.title}\n${recipeUrl}`;
+
+    const whatsappUrl =
+      `https://wa.me/?text=${encodeURIComponent(
+        message
+      )}`;
+
+    window.open(
+      whatsappUrl,
+      "_blank"
+    );
+  };
+
+  // =========================
   // ADD COMMENT
   // =========================
   const addComment = async () => {
     if (!userName.trim() || !commentText.trim()) {
-      alert("Please enter your name and comment");
+      alert(
+        "Please enter your name and comment"
+      );
       return;
     }
 
@@ -126,16 +190,25 @@ function RecipeDetails() {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Comment added successfully 💬");
+        alert(
+          "Comment added successfully 💬"
+        );
 
         setCommentText("");
 
         await fetchComments();
       } else {
-        alert(data.message || "Failed to add comment");
+        alert(
+          data.message ||
+            "Failed to add comment"
+        );
       }
     } catch (error) {
-      console.error("Comment error:", error);
+      console.error(
+        "Comment error:",
+        error
+      );
+
       alert("Server connection error");
     }
   };
@@ -150,7 +223,9 @@ function RecipeDetails() {
     }
 
     if (!userName.trim()) {
-      alert("Please enter your name before rating");
+      alert(
+        "Please enter your name before rating"
+      );
       return;
     }
 
@@ -173,16 +248,25 @@ function RecipeDetails() {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Rating added successfully ⭐");
+        alert(
+          "Rating added successfully ⭐"
+        );
 
         setSelectedRating(0);
 
         await fetchRatings();
       } else {
-        alert(data.message || "Failed to add rating");
+        alert(
+          data.message ||
+            "Failed to add rating"
+        );
       }
     } catch (error) {
-      console.error("Rating error:", error);
+      console.error(
+        "Rating error:",
+        error
+      );
+
       alert("Server connection error");
     }
   };
@@ -192,7 +276,12 @@ function RecipeDetails() {
   // =========================
   if (loading) {
     return (
-      <h2 style={{ textAlign: "center", marginTop: "50px" }}>
+      <h2
+        style={{
+          textAlign: "center",
+          marginTop: "50px",
+        }}
+      >
         Loading...
       </h2>
     );
@@ -203,7 +292,12 @@ function RecipeDetails() {
   // =========================
   if (!recipe) {
     return (
-      <h2 style={{ textAlign: "center", marginTop: "50px" }}>
+      <h2
+        style={{
+          textAlign: "center",
+          marginTop: "50px",
+        }}
+      >
         Recipe not found
       </h2>
     );
@@ -218,12 +312,76 @@ function RecipeDetails() {
         maxWidth: "900px",
         margin: "30px auto",
         padding: "20px",
-        fontFamily: "Arial, sans-serif",
+        fontFamily:
+          "Arial, sans-serif",
       }}
     >
-      <h1 style={{ textAlign: "center" }}>
+      <h1
+        style={{
+          textAlign: "center",
+        }}
+      >
         {recipe.title}
       </h1>
+
+      {/* =========================
+          SHARE BUTTONS
+      ========================= */}
+
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          gap: "10px",
+          flexWrap: "wrap",
+          margin: "20px 0 25px",
+        }}
+      >
+        <button
+          onClick={shareRecipe}
+          style={{
+            padding: "12px 20px",
+            background: "#4CAF50",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontSize: "15px",
+          }}
+        >
+          📤 Share Recipe
+        </button>
+
+        <button
+          onClick={copyRecipeLink}
+          style={{
+            padding: "12px 20px",
+            background: "#555",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontSize: "15px",
+          }}
+        >
+          📋 Copy Link
+        </button>
+
+        <button
+          onClick={shareOnWhatsApp}
+          style={{
+            padding: "12px 20px",
+            background: "#25D366",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontSize: "15px",
+          }}
+        >
+          💬 WhatsApp
+        </button>
+      </div>
 
       {recipe.image && (
         <img
@@ -241,18 +399,27 @@ function RecipeDetails() {
 
       <h2>📝 Description</h2>
 
-      <p style={{ lineHeight: "1.6" }}>
+      <p
+        style={{
+          lineHeight: "1.6",
+        }}
+      >
         {recipe.description}
       </p>
 
       <p>
         <strong>Category:</strong>{" "}
-        {recipe.category || "Not specified"}
+        {recipe.category ||
+          "Not specified"}
       </p>
 
       <p>
-        <strong>⏱ Cooking Time:</strong>{" "}
-        {recipe.cookingTime || "Not specified"} minutes
+        <strong>
+          ⏱ Cooking Time:
+        </strong>{" "}
+        {recipe.cookingTime ||
+          "Not specified"}{" "}
+        minutes
       </p>
 
       <h2>🥕 Ingredients</h2>
@@ -292,13 +459,22 @@ function RecipeDetails() {
       >
         <h2>⭐ Recipe Rating</h2>
 
-        <h3 style={{ fontSize: "28px" }}>
+        <h3
+          style={{
+            fontSize: "28px",
+          }}
+        >
           ⭐ {averageRating} / 5
         </h3>
 
         <p>
-          Based on <strong>{totalRatings}</strong>{" "}
-          {totalRatings === 1 ? "rating" : "ratings"}
+          Based on{" "}
+          <strong>
+            {totalRatings}
+          </strong>{" "}
+          {totalRatings === 1
+            ? "rating"
+            : "ratings"}
         </p>
 
         <h3>Your Rating:</h3>
@@ -306,42 +482,56 @@ function RecipeDetails() {
         <div
           style={{
             display: "flex",
-            justifyContent: "center",
+            justifyContent:
+              "center",
             gap: "8px",
             fontSize: "40px",
             marginBottom: "10px",
           }}
         >
-          {[1, 2, 3, 4, 5].map((star) => (
-            <span
-              key={star}
-              onClick={() => setSelectedRating(star)}
-              style={{
-                cursor: "pointer",
-                color:
-                  star <= selectedRating
-                    ? "#f5b301"
-                    : "#ccc",
-              }}
-            >
-              ★
-            </span>
-          ))}
+          {[1, 2, 3, 4, 5].map(
+            (star) => (
+              <span
+                key={star}
+                onClick={() =>
+                  setSelectedRating(
+                    star
+                  )
+                }
+                style={{
+                  cursor: "pointer",
+                  color:
+                    star <=
+                    selectedRating
+                      ? "#f5b301"
+                      : "#ccc",
+                }}
+              >
+                ★
+              </span>
+            )
+          )}
         </div>
 
         <input
           type="text"
           placeholder="Enter your name"
           value={userName}
-          onChange={(e) => setUserName(e.target.value)}
+          onChange={(e) =>
+            setUserName(
+              e.target.value
+            )
+          }
           style={{
             width: "100%",
             padding: "12px",
             marginTop: "10px",
             marginBottom: "15px",
             borderRadius: "6px",
-            border: "1px solid #ccc",
-            boxSizing: "border-box",
+            border:
+              "1px solid #ccc",
+            boxSizing:
+              "border-box",
             fontSize: "16px",
           }}
         />
@@ -364,21 +554,31 @@ function RecipeDetails() {
           COMMENTS
       ========================= */}
 
-      <div style={{ marginTop: "40px" }}>
+      <div
+        style={{
+          marginTop: "40px",
+        }}
+      >
         <h2>💬 Comments</h2>
 
         <textarea
           placeholder="Write your comment..."
           value={commentText}
-          onChange={(e) => setCommentText(e.target.value)}
+          onChange={(e) =>
+            setCommentText(
+              e.target.value
+            )
+          }
           rows="4"
           style={{
             width: "100%",
             padding: "12px",
             marginBottom: "10px",
             borderRadius: "6px",
-            border: "1px solid #ccc",
-            boxSizing: "border-box",
+            border:
+              "1px solid #ccc",
+            boxSizing:
+              "border-box",
             fontSize: "16px",
           }}
         />
@@ -396,25 +596,44 @@ function RecipeDetails() {
           Add Comment
         </button>
 
-        <div style={{ marginTop: "25px" }}>
+        <div
+          style={{
+            marginTop: "25px",
+          }}
+        >
           {comments.length === 0 ? (
-            <p>No comments yet.</p>
+            <p>
+              No comments yet.
+            </p>
           ) : (
-            comments.map((comment) => (
-              <div
-                key={comment._id}
-                style={{
-                  borderBottom: "1px solid #ddd",
-                  padding: "15px 0",
-                }}
-              >
-                <strong>{comment.userName}</strong>
+            comments.map(
+              (comment) => (
+                <div
+                  key={comment._id}
+                  style={{
+                    borderBottom:
+                      "1px solid #ddd",
+                    padding:
+                      "15px 0",
+                  }}
+                >
+                  <strong>
+                    {comment.userName}
+                  </strong>
 
-                <p style={{ margin: "5px 0" }}>
-                  {comment.commentText}
-                </p>
-              </div>
-            ))
+                  <p
+                    style={{
+                      margin:
+                        "5px 0",
+                    }}
+                  >
+                    {
+                      comment.commentText
+                    }
+                  </p>
+                </div>
+              )
+            )
           )}
         </div>
       </div>
