@@ -105,39 +105,89 @@ function RecipeDetails() {
   const shareRecipe = async () => {
     const recipeUrl = window.location.href;
 
+    const shareText = `
+🍽️ ${recipe.title}
+
+📝 ${recipe.description || "No description available."}
+
+📂 Category: ${
+      recipe.category || "Not specified"
+    }
+
+⏱️ Cooking Time: ${
+      recipe.cookingTime || "Not specified"
+    } minutes
+
+🥕 Ingredients:
+${recipe.ingredients || "Not specified"}
+
+👩‍🍳 Instructions:
+${recipe.instructions || "Not specified"}
+
+🔗 View Recipe:
+${recipeUrl}
+`;
+
     try {
       if (navigator.share) {
         await navigator.share({
           title: recipe.title,
-          text: `Check out this recipe: ${recipe.title}`,
-          url: recipeUrl,
+          text: shareText,
         });
       } else {
-        await navigator.clipboard.writeText(recipeUrl);
+        await navigator.clipboard.writeText(shareText);
 
         alert(
-          "Recipe link copied successfully! 📋"
+          "Recipe details copied successfully! 📋"
         );
       }
     } catch (error) {
-      console.log("Share cancelled or failed:", error);
+      console.log(
+        "Share cancelled or failed:",
+        error
+      );
     }
   };
 
   // =========================
-  // COPY LINK
+  // COPY RECIPE DETAILS
   // =========================
   const copyRecipeLink = async () => {
-    try {
-      await navigator.clipboard.writeText(
-        window.location.href
-      );
+    const recipeUrl = window.location.href;
 
-      alert("Recipe link copied! 📋");
+    const recipeText = `
+🍽️ ${recipe.title}
+
+📝 ${recipe.description || "No description available."}
+
+📂 Category: ${
+      recipe.category || "Not specified"
+    }
+
+⏱️ Cooking Time: ${
+      recipe.cookingTime || "Not specified"
+    } minutes
+
+🥕 Ingredients:
+${recipe.ingredients || "Not specified"}
+
+👩‍🍳 Instructions:
+${recipe.instructions || "Not specified"}
+
+🔗 View Recipe:
+${recipeUrl}
+`;
+
+    try {
+      await navigator.clipboard.writeText(recipeText);
+
+      alert(
+        "Recipe details copied successfully! 📋"
+      );
     } catch (error) {
       console.error("Copy error:", error);
 
-      alert("Unable to copy link.");
+      alert("Unable to copy recipe details.");
     }
   };
 
@@ -147,7 +197,28 @@ function RecipeDetails() {
   const shareOnWhatsApp = () => {
     const recipeUrl = window.location.href;
 
-    const message = `Check out this recipe: ${recipe.title}\n${recipeUrl}`;
+    const message = `
+🍽️ ${recipe.title}
+
+📝 ${recipe.description || "No description available."}
+
+📂 Category: ${
+      recipe.category || "Not specified"
+    }
+
+⏱️ Cooking Time: ${
+      recipe.cookingTime || "Not specified"
+    } minutes
+
+🥕 Ingredients:
+${recipe.ingredients || "Not specified"}
+
+👩‍🍳 Instructions:
+${recipe.instructions || "Not specified"}
+
+🔗 View Recipe:
+${recipeUrl}
+`;
 
     const whatsappUrl =
       `https://wa.me/?text=${encodeURIComponent(
@@ -164,7 +235,10 @@ function RecipeDetails() {
   // ADD COMMENT
   // =========================
   const addComment = async () => {
-    if (!userName.trim() || !commentText.trim()) {
+    if (
+      !userName.trim() ||
+      !commentText.trim()
+    ) {
       alert(
         "Please enter your name and comment"
       );
@@ -182,7 +256,8 @@ function RecipeDetails() {
           body: JSON.stringify({
             recipeId: id,
             userName: userName.trim(),
-            commentText: commentText.trim(),
+            commentText:
+              commentText.trim(),
           }),
         }
       );
@@ -316,6 +391,8 @@ function RecipeDetails() {
           "Arial, sans-serif",
       }}
     >
+      {/* RECIPE TITLE */}
+
       <h1
         style={{
           textAlign: "center",
@@ -334,54 +411,77 @@ function RecipeDetails() {
           justifyContent: "center",
           gap: "10px",
           flexWrap: "wrap",
-          margin: "20px 0 25px",
+          margin:
+            "20px 0 25px",
         }}
       >
+        {/* SHARE */}
+
         <button
           onClick={shareRecipe}
           style={{
-            padding: "12px 20px",
-            background: "#4CAF50",
+            padding:
+              "12px 20px",
+            background:
+              "#4CAF50",
             color: "white",
             border: "none",
-            borderRadius: "8px",
+            borderRadius:
+              "8px",
             cursor: "pointer",
-            fontSize: "15px",
+            fontSize:
+              "15px",
           }}
         >
           📤 Share Recipe
         </button>
 
+        {/* COPY */}
+
         <button
           onClick={copyRecipeLink}
           style={{
-            padding: "12px 20px",
-            background: "#555",
+            padding:
+              "12px 20px",
+            background:
+              "#555",
             color: "white",
             border: "none",
-            borderRadius: "8px",
+            borderRadius:
+              "8px",
             cursor: "pointer",
-            fontSize: "15px",
+            fontSize:
+              "15px",
           }}
         >
-          📋 Copy Link
+          📋 Copy Recipe
         </button>
 
+        {/* WHATSAPP */}
+
         <button
-          onClick={shareOnWhatsApp}
+          onClick={
+            shareOnWhatsApp
+          }
           style={{
-            padding: "12px 20px",
-            background: "#25D366",
+            padding:
+              "12px 20px",
+            background:
+              "#25D366",
             color: "white",
             border: "none",
-            borderRadius: "8px",
+            borderRadius:
+              "8px",
             cursor: "pointer",
-            fontSize: "15px",
+            fontSize:
+              "15px",
           }}
         >
           💬 WhatsApp
         </button>
       </div>
+
+      {/* RECIPE IMAGE */}
 
       {recipe.image && (
         <img
@@ -389,29 +489,42 @@ function RecipeDetails() {
           alt={recipe.title}
           style={{
             width: "100%",
-            maxHeight: "450px",
-            objectFit: "cover",
-            borderRadius: "12px",
-            marginBottom: "25px",
+            maxHeight:
+              "450px",
+            objectFit:
+              "cover",
+            borderRadius:
+              "12px",
+            marginBottom:
+              "25px",
           }}
         />
       )}
+
+      {/* DESCRIPTION */}
 
       <h2>📝 Description</h2>
 
       <p
         style={{
-          lineHeight: "1.6",
+          lineHeight:
+            "1.6",
         }}
       >
         {recipe.description}
       </p>
 
+      {/* CATEGORY */}
+
       <p>
-        <strong>Category:</strong>{" "}
+        <strong>
+          Category:
+        </strong>{" "}
         {recipe.category ||
           "Not specified"}
       </p>
+
+      {/* COOKING TIME */}
 
       <p>
         <strong>
@@ -422,23 +535,31 @@ function RecipeDetails() {
         minutes
       </p>
 
+      {/* INGREDIENTS */}
+
       <h2>🥕 Ingredients</h2>
 
       <p
         style={{
-          whiteSpace: "pre-line",
-          lineHeight: "1.7",
+          whiteSpace:
+            "pre-line",
+          lineHeight:
+            "1.7",
         }}
       >
         {recipe.ingredients}
       </p>
 
+      {/* INSTRUCTIONS */}
+
       <h2>👩‍🍳 Instructions</h2>
 
       <p
         style={{
-          whiteSpace: "pre-line",
-          lineHeight: "1.7",
+          whiteSpace:
+            "pre-line",
+          lineHeight:
+            "1.7",
         }}
       >
         {recipe.instructions}
@@ -450,18 +571,26 @@ function RecipeDetails() {
 
       <div
         style={{
-          marginTop: "40px",
-          padding: "25px",
-          border: "1px solid #ddd",
-          borderRadius: "12px",
-          textAlign: "center",
+          marginTop:
+            "40px",
+          padding:
+            "25px",
+          border:
+            "1px solid #ddd",
+          borderRadius:
+            "12px",
+          textAlign:
+            "center",
         }}
       >
-        <h2>⭐ Recipe Rating</h2>
+        <h2>
+          ⭐ Recipe Rating
+        </h2>
 
         <h3
           style={{
-            fontSize: "28px",
+            fontSize:
+              "28px",
           }}
         >
           ⭐ {averageRating} / 5
@@ -477,16 +606,21 @@ function RecipeDetails() {
             : "ratings"}
         </p>
 
-        <h3>Your Rating:</h3>
+        <h3>
+          Your Rating:
+        </h3>
 
         <div
           style={{
-            display: "flex",
+            display:
+              "flex",
             justifyContent:
               "center",
             gap: "8px",
-            fontSize: "40px",
-            marginBottom: "10px",
+            fontSize:
+              "40px",
+            marginBottom:
+              "10px",
           }}
         >
           {[1, 2, 3, 4, 5].map(
@@ -499,7 +633,8 @@ function RecipeDetails() {
                   )
                 }
                 style={{
-                  cursor: "pointer",
+                  cursor:
+                    "pointer",
                   color:
                     star <=
                     selectedRating
@@ -523,27 +658,40 @@ function RecipeDetails() {
             )
           }
           style={{
-            width: "100%",
-            padding: "12px",
-            marginTop: "10px",
-            marginBottom: "15px",
-            borderRadius: "6px",
+            width:
+              "100%",
+            padding:
+              "12px",
+            marginTop:
+              "10px",
+            marginBottom:
+              "15px",
+            borderRadius:
+              "6px",
             border:
               "1px solid #ccc",
             boxSizing:
               "border-box",
-            fontSize: "16px",
+            fontSize:
+              "16px",
           }}
         />
 
         <button
-          onClick={submitRating}
+          onClick={
+            submitRating
+          }
           style={{
-            padding: "12px 25px",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontSize: "16px",
+            padding:
+              "12px 25px",
+            border:
+              "none",
+            borderRadius:
+              "6px",
+            cursor:
+              "pointer",
+            fontSize:
+              "16px",
           }}
         >
           Submit Rating
@@ -556,10 +704,13 @@ function RecipeDetails() {
 
       <div
         style={{
-          marginTop: "40px",
+          marginTop:
+            "40px",
         }}
       >
-        <h2>💬 Comments</h2>
+        <h2>
+          💬 Comments
+        </h2>
 
         <textarea
           placeholder="Write your comment..."
@@ -571,37 +722,53 @@ function RecipeDetails() {
           }
           rows="4"
           style={{
-            width: "100%",
-            padding: "12px",
-            marginBottom: "10px",
-            borderRadius: "6px",
+            width:
+              "100%",
+            padding:
+              "12px",
+            marginBottom:
+              "10px",
+            borderRadius:
+              "6px",
             border:
               "1px solid #ccc",
             boxSizing:
               "border-box",
-            fontSize: "16px",
+            fontSize:
+              "16px",
           }}
         />
 
         <button
-          onClick={addComment}
+          onClick={
+            addComment
+          }
           style={{
-            padding: "12px 25px",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontSize: "16px",
+            padding:
+              "12px 25px",
+            border:
+              "none",
+            borderRadius:
+              "6px",
+            cursor:
+              "pointer",
+            fontSize:
+              "16px",
           }}
         >
           Add Comment
         </button>
 
+        {/* COMMENTS LIST */}
+
         <div
           style={{
-            marginTop: "25px",
+            marginTop:
+              "25px",
           }}
         >
-          {comments.length === 0 ? (
+          {comments.length ===
+          0 ? (
             <p>
               No comments yet.
             </p>
@@ -609,7 +776,9 @@ function RecipeDetails() {
             comments.map(
               (comment) => (
                 <div
-                  key={comment._id}
+                  key={
+                    comment._id
+                  }
                   style={{
                     borderBottom:
                       "1px solid #ddd",
@@ -618,7 +787,9 @@ function RecipeDetails() {
                   }}
                 >
                   <strong>
-                    {comment.userName}
+                    {
+                      comment.userName
+                    }
                   </strong>
 
                   <p
